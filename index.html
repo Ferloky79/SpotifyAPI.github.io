@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Laboratorio educativo para probar Spotify Web API con OAuth 2.0 PKCE." />
+    <meta name="theme-color" content="#0c0d0d" />
+    <title>Spotify API Lab</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Spotify API Lab, inicio">
+        <span class="brand-mark" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </span>
+        <span>
+          <strong>Spotify API</strong>
+          <small>LAB / 01</small>
+        </span>
+      </a>
+
+      <div class="topbar-actions">
+        <span class="eyebrow">OAuth 2.0 + PKCE</span>
+        <button class="button button-ghost button-small" id="logoutButton" type="button" hidden>
+          Cerrar sesión
+        </button>
+      </div>
+    </header>
+
+    <main class="app-shell" id="main-content">
+      <aside class="sidebar" aria-labelledby="setupTitle">
+        <div>
+          <p class="section-kicker">Configuración</p>
+          <h1 id="setupTitle">Conecta tu app de Spotify.</h1>
+          <p class="sidebar-copy">
+            Solo necesitas el <strong>Client ID</strong>. Esta aplicación nunca solicita ni guarda tu Client Secret.
+          </p>
+        </div>
+
+        <div class="setup-form">
+          <label for="clientIdInput">Client ID</label>
+          <div class="input-with-action">
+            <input
+              id="clientIdInput"
+              name="clientId"
+              type="text"
+              inputmode="text"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="Ej. 2a1b3c4d..."
+              aria-describedby="clientIdHelp"
+            />
+            <button class="icon-button" id="clearClientIdButton" type="button" aria-label="Borrar Client ID" title="Borrar Client ID">×</button>
+          </div>
+          <p class="field-help" id="clientIdHelp">Se guarda únicamente en tu navegador.</p>
+
+          <label for="redirectUriOutput">Redirect URI exacta</label>
+          <div class="copy-field">
+            <code id="redirectUriOutput"></code>
+            <button class="icon-button" id="copyRedirectButton" type="button" aria-label="Copiar Redirect URI" title="Copiar Redirect URI">
+              <span aria-hidden="true">⧉</span>
+            </button>
+          </div>
+          <p class="field-help">Agrégala en el Dashboard de Spotify antes de conectar.</p>
+
+          <button class="button button-primary" id="loginButton" type="button">
+            Conectar con Spotify
+            <span aria-hidden="true">↗</span>
+          </button>
+        </div>
+
+        <div class="connection-card" aria-live="polite">
+          <span class="status-dot" id="connectionDot"></span>
+          <div>
+            <strong id="connectionTitle">Sin conexión</strong>
+            <p id="connectionDescription">Configura el Client ID para comenzar.</p>
+          </div>
+        </div>
+
+        <div class="scope-list">
+          <p class="scope-title">Permisos solicitados</p>
+          <ul>
+            <li>Leer perfil y playlists</li>
+            <li>Leer favoritos y reproducción</li>
+            <li>Controlar el reproductor</li>
+          </ul>
+        </div>
+
+        <a class="text-link" href="https://developer.spotify.com/dashboard" target="_blank" rel="noreferrer">
+          Abrir Spotify Developer Dashboard <span aria-hidden="true">↗</span>
+        </a>
+      </aside>
+
+      <section class="workspace" aria-label="Laboratorio de API">
+        <div class="hero">
+          <div>
+            <p class="section-kicker">Web API playground</p>
+            <h2>Haz una petición.<br /><em>Entiende la respuesta.</em></h2>
+          </div>
+          <p>
+            Explora datos reales de tu cuenta y observa qué ocurre en cada paso de una llamada con
+            <code>fetch</code> y <code>await</code>.
+          </p>
+        </div>
+
+        <section class="quick-tests" aria-labelledby="quickTestsTitle">
+          <div class="section-heading">
+            <div>
+              <p class="section-kicker">01 / Atajos</p>
+              <h3 id="quickTestsTitle">Pruebas rápidas</h3>
+            </div>
+            <span class="section-note">Requieren iniciar sesión</span>
+          </div>
+
+          <div class="test-grid">
+            <button class="test-card" type="button" data-preset="profile">
+              <span class="test-number">01</span>
+              <span class="test-icon" aria-hidden="true">◎</span>
+              <strong>Mi perfil</strong>
+              <small>GET /me</small>
+            </button>
+            <button class="test-card" type="button" data-preset="playlists">
+              <span class="test-number">02</span>
+              <span class="test-icon" aria-hidden="true">▤</span>
+              <strong>Mis playlists</strong>
+              <small>GET /me/playlists</small>
+            </button>
+            <button class="test-card" type="button" data-preset="top">
+              <span class="test-number">03</span>
+              <span class="test-icon" aria-hidden="true">↗</span>
+              <strong>Top canciones</strong>
+              <small>GET /me/top/tracks</small>
+            </button>
+            <button class="test-card" type="button" data-preset="player">
+              <span class="test-number">04</span>
+              <span class="test-icon" aria-hidden="true">▶</span>
+              <strong>Reproducción</strong>
+              <small>GET /me/player</small>
+            </button>
+          </div>
+        </section>
+
+        <section class="search-panel" aria-labelledby="searchTitle">
+          <div>
+            <p class="section-kicker">02 / Catálogo</p>
+            <h3 id="searchTitle">Buscar una canción</h3>
+          </div>
+          <form class="search-form" id="searchForm">
+            <label class="sr-only" for="searchInput">Canción o artista</label>
+            <input id="searchInput" type="search" placeholder="Escribe una canción o artista..." autocomplete="off" />
+            <button class="button button-primary" type="submit">Buscar <span aria-hidden="true">→</span></button>
+          </form>
+        </section>
+
+        <section class="console-section" aria-labelledby="consoleTitle">
+          <div class="section-heading">
+            <div>
+              <p class="section-kicker">03 / Consola</p>
+              <h3 id="consoleTitle">Probador de endpoints</h3>
+            </div>
+            <span class="section-note">Las llamadas se hacen desde tu navegador</span>
+          </div>
+
+          <div class="console-grid">
+            <form class="request-panel" id="requestForm">
+              <div class="panel-label">
+                <span>Petición</span>
+                <span class="live-indicator"><i></i> editable</span>
+              </div>
+
+              <div class="endpoint-row">
+                <label class="sr-only" for="methodSelect">Método HTTP</label>
+                <select id="methodSelect" aria-label="Método HTTP">
+                  <option>GET</option>
+                  <option>POST</option>
+                  <option>PUT</option>
+                  <option>DELETE</option>
+                </select>
+                <span class="api-origin">api.spotify.com/v1</span>
+                <label class="sr-only" for="endpointInput">Endpoint</label>
+                <input id="endpointInput" type="text" value="/me" spellcheck="false" />
+              </div>
+
+              <label class="body-label" for="requestBodyInput">Body JSON <span>(opcional)</span></label>
+              <textarea id="requestBodyInput" rows="6" spellcheck="false" placeholder='{"uris": ["spotify:track:..."]}'></textarea>
+
+              <button class="button button-dark" id="sendRequestButton" type="submit">
+                Enviar petición
+                <span aria-hidden="true">⌘↵</span>
+              </button>
+            </form>
+
+            <div class="response-panel">
+              <div class="panel-label response-meta">
+                <span>Respuesta</span>
+                <div>
+                  <span id="responseStatus">—</span>
+                  <span id="responseTime">0 ms</span>
+                  <button class="mini-action" id="copyResponseButton" type="button">Copiar</button>
+                </div>
+              </div>
+              <pre id="responseOutput" tabindex="0"><code>{
+  "mensaje": "La respuesta JSON aparecerá aquí"
+}</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <section class="explanation-section" aria-labelledby="explanationTitle">
+          <div>
+            <p class="section-kicker">04 / Qué sucede</p>
+            <h3 id="explanationTitle">La petición, paso a paso</h3>
+          </div>
+          <ol class="steps" id="requestSteps">
+            <li data-step="token">
+              <span>1</span>
+              <div><strong>Preparar el token</strong><p>Se revisa si el access token sigue vigente.</p></div>
+            </li>
+            <li data-step="fetch">
+              <span>2</span>
+              <div><strong>Ejecutar <code>fetch()</code></strong><p>El navegador envía el método, la URL y los headers.</p></div>
+            </li>
+            <li data-step="await">
+              <span>3</span>
+              <div><strong>Esperar con <code>await</code></strong><p>JavaScript continúa cuando Spotify responde.</p></div>
+            </li>
+            <li data-step="json">
+              <span>4</span>
+              <div><strong>Convertir el JSON</strong><p>La respuesta se transforma en un objeto utilizable.</p></div>
+            </li>
+          </ol>
+        </section>
+
+        <section class="results-section" id="resultsSection" aria-labelledby="resultsTitle" hidden>
+          <div class="section-heading">
+            <div>
+              <p class="section-kicker">05 / Vista</p>
+              <h3 id="resultsTitle">Resultado interpretado</h3>
+            </div>
+            <span class="section-note" id="resultsNote"></span>
+          </div>
+          <div id="visualResults"></div>
+        </section>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
